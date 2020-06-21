@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.hengheng.dao.IUsersDao">
+    <resultMap id="userDaoMap" type="com.hengheng.domain.Users">
+        <id property="id" column="id"/>
+        <result column="username" property="username"/>
+        <result column="email" property="email"/>
+        <result column="password" property="password"/>
+        <result column="phoneNum" property="phoneNum"/>
+        <result column="status" property="status"/>
+        <collection property="roles" ofType="com.hengheng.domain.Role">
+            <id column="rid" property="id"/>
+            <result property="roleName" column="roleName"/>
+            <result property="roleDesc" column="roleDesc"/>
+
+        </collection>
+    </resultMap>
+    <resultMap id="userRolePermissionMap" type="com.hengheng.domain.Users">
+        <id property="id" column="id"/>
+        <result column="username" property="username"/>
+        <result column="email" property="email"/>
+        <result column="password" property="password"/>
+        <result column="phoneNum" property="phoneNum"/>
+        <result column="status" property="status"/>
+        <collection property="roles" ofType="com.hengheng.domain.Role">
+            <id column="rid" property="id"/>
+            <result property="roleName" column="roleName"/>
+            <result property="roleDesc" column="roleDesc"/>
+            <collection property="permissions" ofType="com.hengheng.domain.Permission">
+                <id property="id" column="id"/>
+                <result column="permissionName" property="permissionName"/>
+                <result column="url" property="url"/>
+
+            </collection>
+        </collection>
+    </resultMap>
+
+    <select id="findByUserName" resultMap="userDaoMap">
+        select u.*,r.id as rid,r.rolename,r.roleDesc from users u
+        LEFT OUTER JOIN users_role ur on u.id = ur.userId
+        LEFT OUTER JOIN role r on r.id = ur.roleId
+        where u.username = #{username}
+    </select>
+    <insert id="save" parameterType="com.hengheng.domain.Users">
+        insert into users(email,username,password,phoneNum,status)values(#{email},#{username},#{password},#{phoneNum},#{status})
+    </insert>
+
+    <select id="findAll" resultType="com.hengheng.domain.Users">
+        select * from users
+    </select>
+    <select id="findById" resultMap="userRolePermissionMap">
+        select u.*,r.id as rid,r.rolename,r.roleDesc,p.permissionName,p.url from users u
+         LEFT OUTER JOIN users_role ur on u.id = ur.userId
+         LEFT OUTER JOIN role r on r.id = ur.roleId
+		 LEFT OUTER JOIN role_permission rp on rp.roleId = r.id
+		 LEFT OUTER JOIN permission p  on p.id = rp.permissionId
+        where u.id = #{id}
+    </select>
+    <select id="findOtherRoles" parameterType="int" resultType="com.hengheng.domain.Role">
+        select * from role where id not in (select roleid from users_role where userId = #{userid})
+    </select>
+
+    <!--<insert id="addRoleToUser" >-->
+        <!--insert into users_role(userId, roleId) VALUES-->
+        <!--<foreach collection="map.entrySet()" index="key" item="value" separator=",">-->
+            <!--(#{key},#{value})-->
+        <!--</foreach>-->
+    <!--</insert>-->
+    <insert id="addRoleToUser" >
+        insert into users_role(userId, roleId) VALUES
+        <foreach collection="ids" index="index" item="item" separator=",">
+            (#{userid},#{item})
+        </foreach>
+    </insert>
+</mapper>

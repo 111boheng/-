@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.hengheng.dao.IOrderDao">
+    <resultMap id="orderMap" type="com.hengheng.domain.Orders">
+        <id property="id" column="id"/>
+        <result property="orderNum" column="orderNum"/>
+        <result property="orderTime" column="orderTime"/>
+        <result property="orderStatus" column="orderStatus"/>
+        <result property="peopleCount" column="peopleCount"/>
+        <result property="payType" column="payType"/>
+        <result property="orderDesc" column="orderDesc"/>
+        <collection property="product" ofType="com.hengheng.domain.Product">
+            <id property="id" column="id"/>
+            <result column="productNum" property="productNum"/>
+            <result column="productName" property="productName"/>
+            <result column="cityName" property="cityName"/>
+            <result column="departureTime" property="departureTime"/>
+            <result column="productPrice" property="productPrice"/>
+            <result column="productDesc" property="productDesc"/>
+
+        </collection>
+    </resultMap>
+    <select id="findAll" resultMap="orderMap">
+        select * from orders o  LEFT OUTER JOIN product p  on o.productId = p.id
+    </select>
+
+</mapper>
